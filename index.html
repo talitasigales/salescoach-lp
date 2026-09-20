@@ -559,70 +559,62 @@
     .tilt { transition: none; }
   }
 
-  /* ── O produto: console fixo + passos que avançam com a rolagem ──────────
-     O trilho horizontal de cartões foi substituído. A tela do produto fica
-     presa no lugar e troca de conteúdo conforme os passos passam, o que deixa
-     a captura grande e faz a seção contar uma linha do tempo: antes, durante,
-     depois e sempre. */
-  .os { padding-block: 112px 130px; }
-  /* O HUD de fases fica preso no topo: a pessoa vê o ponto avançar de
-     "antes" até "sempre" enquanto rola. */
-  .os-line { position: sticky; top: calc(var(--nav-h) + 10px); z-index: 6; display: flex; align-items: center; gap: 14px; margin-top: 34px; padding: 11px 18px; border-radius: 999px; border: 1px solid var(--line); background: rgba(8,11,19,.94); backdrop-filter: blur(14px); box-shadow: 0 18px 40px -26px rgba(0,0,0,.95); font-size: 12px; letter-spacing: .17em; text-transform: uppercase; color: var(--dim-2); }
-  .os-line span { position: relative; padding-left: 15px; transition: color .4s; }
-  .os-line span::before { content: ""; position: absolute; left: 0; top: 50%; width: 7px; height: 7px; border-radius: 50%; translate: 0 -50%; background: var(--line-2); transition: background .4s, box-shadow .4s; }
-  .os-line span.on { color: #fff; }
-  .os-line span.on::before { background: var(--blue); box-shadow: 0 0 0 4px rgba(79,139,240,.16), 0 0 14px rgba(79,139,240,.9); }
-  .os-line i { flex: 1; height: 1px; background: linear-gradient(90deg, var(--line), var(--line-2), var(--line)); }
-  @media (max-width: 900px) { .os-line { display: none; } }
+  /* ── O produto: tour por abas ───────────────────────────────────────────
+     Um momento de cada vez, com a captura em tamanho grande e o texto
+     embaixo, com ar. As abas avançam sozinhas a cada sete segundos; passar
+     o mouse ou tocar numa aba pausa. */
+  .tour { padding-block: 112px 128px; }
+  .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 44px; }
+  .tab { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 18px 20px 22px; border-radius: 16px; border: 1px solid var(--line); background: rgba(146,176,236,.03); color: var(--dim); text-align: left; font-family: inherit; cursor: pointer; transition: border-color .25s, background .25s, color .25s; overflow: hidden; }
+  .tab:hover { border-color: var(--line-2); background: rgba(146,176,236,.07); color: #fff; }
+  .tab.on { border-color: rgba(79,139,240,.5); background: rgba(79,139,240,.08); color: #fff; }
+  .tab .k { font-size: 12px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; color: var(--blue-2); }
+  .tab .t { font-size: 17px; font-weight: 500; letter-spacing: -.01em; }
+  .tab .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(146,176,236,.12); }
+  .tab .bar::after { content: ""; display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--blue), var(--violet)); }
+  .tab.on .bar::after { animation: abaFill 7s linear forwards; }
+  .tour:hover .tab.on .bar::after, .tour.pausado .tab.on .bar::after { animation-play-state: paused; }
+  @keyframes abaFill { to { width: 100%; } }
 
-  .os-grid { display: grid; grid-template-columns: minmax(290px, 380px) 1fr; gap: 60px; align-items: start; margin-top: 10px; }
-  .os-steps { list-style: none; margin: 0; padding: 0; }
-  .os-step { position: relative; padding: 0 0 0 32px; min-height: 66vh; display: flex; flex-direction: column; justify-content: center; opacity: .3; transition: opacity .55s ease; }
-  .os-step::before { content: ""; position: absolute; left: 6px; top: 0; bottom: 0; width: 1px; background: var(--line); }
-  .os-step:first-child::before { top: 50%; }
-  .os-step:last-child::before { bottom: 50%; }
-  .os-step::after { content: ""; position: absolute; left: 0; top: 50%; width: 13px; height: 13px; border-radius: 50%; translate: 0 -50%; border: 1px solid var(--line-2); background: var(--ink-0); transition: background .45s, border-color .45s, box-shadow .45s; }
-  .os-step.on { opacity: 1; }
-  .os-step.on::after { background: var(--blue); border-color: var(--blue); box-shadow: 0 0 0 5px rgba(79,139,240,.15), 0 0 20px rgba(79,139,240,.85); }
-  .os-step .k { display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--blue-2); }
-  .os-step .k b { font-size: 21px; font-weight: 300; letter-spacing: -.02em; color: rgba(255,255,255,.3); }
-  .os-step h3 { margin-top: 13px; font-size: clamp(21px, 2.1vw, 28px); }
-  .os-step > p { margin-top: 13px; font-size: 14.5px; color: var(--dim); max-width: 44ch; }
-  .os-step .who { margin-top: 20px; grid-template-columns: 1fr 1fr; gap: 11px; }
-  .os-step .who > div { padding: 12px 14px; border-radius: 12px; }
-  .os-step .who span { font-size: 12px; }
-  .os-step .who p { margin-top: 6px; font-size: 12.5px; line-height: 1.5; }
-  .os-shot { display: none; margin-top: 22px; border-radius: 14px; overflow: hidden; border: 1px solid rgba(146,176,236,.18); background: #0B1220; }
+  .tour-stage { position: relative; margin-top: 22px; }
+  .tour-panel { display: flex; flex-direction: column; gap: 34px; }
+  .tour-panel[hidden] { display: none; }
+  .tour-panel.on .tour-shot { animation: tourIn .8s cubic-bezier(.22,1,.36,1) both; }
+  .tour-panel.on .tour-cap { animation: tourIn .8s cubic-bezier(.22,1,.36,1) .12s both; }
+  @keyframes tourIn { from { opacity: 0; transform: translateY(22px) scale(.985); } to { opacity: 1; transform: none; } }
 
-  /* O palco sangra até 24px da borda da tela: a captura fica grande sem
-     desalinhar o texto do resto da página. */
-  .os-stage { margin-right: min(0px, calc((var(--shell) - 100vw) / 2 + 24px)); --sh: min(560px, 66vh); position: sticky; top: calc(var(--nav-h) + 78px); height: var(--sh); }
-  .os-glow { position: absolute; inset: -12% -6%; border-radius: 50%; pointer-events: none; filter: blur(60px); background: radial-gradient(closest-side, rgba(79,139,240,.42), rgba(123,108,246,.16) 60%, transparent); animation: respira 9s ease-in-out infinite; }
-  @keyframes respira { 50% { transform: scale(1.12); opacity: .75; } }
-  .os-screen { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; transform: translateY(26px) scale(.972); transition: opacity .55s ease, transform .85s cubic-bezier(.22,1,.36,1); pointer-events: none; }
-  .os-screen.on { opacity: 1; transform: none; }
-  .os-wrap { position: relative; display: inline-block; max-width: 100%; }
-  .os-screen figure { position: relative; margin: 0; border-radius: 16px; overflow: hidden; border: 1px solid rgba(146,176,236,.22); background: #0B1220; box-shadow: 0 54px 120px -48px rgba(0,0,0,.95); }
-  .os-screen img { max-height: var(--sh); width: auto; max-width: 100%; object-fit: contain; }
-  .os-screen figure::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, transparent 40%, rgba(143,193,255,.15) 50%, transparent 60%); background-size: 260% 100%; animation: varre 7.5s ease-in-out infinite; }
-  /* Captura secundária sobreposta: mostra o que sai da primeira. Usada no
-     treino, onde a sessão por voz termina numa avaliação. */
-  .os-wrap .extra { position: absolute; right: -30px; bottom: -34px; z-index: 3; width: 62%; border-radius: 13px; overflow: hidden;
-    border: 1px solid rgba(146,176,236,.3); background: #0B1220; box-shadow: 0 36px 72px -26px rgba(0,0,0,.98); }
-  .os-wrap .extra img { display: block; width: 100%; }
-  /* Com a captura extra no canto, a etiqueta sai do centro para não colidir. */
-  .os-screen.dupla .os-chip { left: 0; translate: 0 0; }
-  @media (max-width: 1200px) { .os-wrap .extra { width: 66%; right: -14px; } }
-  .os-chip { position: absolute; left: 50%; bottom: -14px; translate: -50% 0; z-index: 3; padding: 6px 14px; border-radius: 999px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--blue-2); border: 1px solid rgba(79,139,240,.35); background: rgba(9,13,24,.92); backdrop-filter: blur(8px); white-space: nowrap; }
+  /* O palco tem sempre a mesma altura; cada momento é uma composição própria. */
+  .tour-shot { position: relative; height: min(600px, 66vh); border-radius: 22px; border: 1px solid rgba(146,176,236,.16); background: radial-gradient(ellipse at 50% 0%, rgba(79,139,240,.16), transparent 60%), #0B1220; overflow: hidden; }
+  .tour-shot .comp { position: absolute; inset: 0; }
+  .tour-shot img { position: absolute; border-radius: 14px; border: 1px solid rgba(146,176,236,.22); box-shadow: 0 40px 90px -40px rgba(0,0,0,.95); object-fit: contain; background: #0B1220; }
+  .comp-antes .principal { left: 5%; top: 44px; width: 68%; height: auto; }
+  .comp-antes .extra { right: 4%; bottom: 40px; width: 46%; height: auto; box-shadow: 0 30px 70px -30px rgba(0,0,0,.95), 0 0 0 1px rgba(146,176,236,.16); }
+  .comp-depois .principal { left: 50%; top: 40px; translate: -50% 0; width: 84%; height: auto; }
+  .comp-sempre .principal { left: 5%; top: 50%; translate: 0 -50%; width: 66%; height: auto; }
+  .comp-sempre .extra { right: 6%; top: 50%; translate: 0 -50%; height: calc(100% - 80px); width: auto; }
+  .comp-durante .principal { right: 9%; top: 50%; translate: 0 -50%; height: calc(100% - 80px); width: auto; }
+  .comp-durante .fala { position: absolute; left: 6%; top: 50%; translate: 0 -50%; width: 46%; display: flex; flex-direction: column; gap: 16px; }
+  .bolha { padding: 16px 20px; border-radius: 18px; font-size: 15.5px; line-height: 1.45; color: #fff; background: rgba(146,176,236,.08); border: 1px solid rgba(146,176,236,.16); }
+  .bolha span { display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim-2); margin-bottom: 5px; }
+  .bolha.fale { background: linear-gradient(160deg, rgba(228,86,47,.22), rgba(228,86,47,.06)); border-color: rgba(228,86,47,.5); font-weight: 500; }
+  .bolha.fale span { color: #FF9C7A; }
+
+  .tour-cap { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: start; }
+  .tour-cap .txt p { margin-top: 12px; font-size: 16px; line-height: 1.6; color: var(--dim); max-width: 60ch; }
+  .tour-cap .who { margin-top: 0; }
+
   @media (max-width: 980px) {
-    .os-grid { grid-template-columns: 1fr; gap: 0; margin-top: 10px; }
-    .os-stage { display: none; }
-    .os-step { min-height: 0; opacity: 1; padding: 34px 0 34px 30px; }
-    .os-step::after { top: 44px; }
-    .os-shot { display: block; }
+    .tabs { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+    .tab { flex: 0 0 62%; scroll-snap-align: start; }
+    .tour-cap { grid-template-columns: 1fr; gap: 24px; }
+    .tour-shot { height: auto; padding: 16px; }
+    .tour-shot .comp { position: static; }
+    .tour-shot img { position: static; width: 100%; height: auto; translate: 0 0; }
+    .tour-shot .extra, .comp-durante .fala { display: none; }
   }
-  @media (max-width: 640px) {
-    .os-step .who { grid-template-columns: 1fr; }
+  @media (prefers-reduced-motion: reduce) {
+    .tab.on .bar::after { animation: none; width: 100%; }
+    .tour-panel.on .tour-shot, .tour-panel.on .tour-cap { animation: none; }
   }
 
   /* ── Ecossistema: mapa de fluxo ─────────────────────────────────────────
@@ -829,7 +821,7 @@
   .in .eyebrow::before, .eyebrow.in::before { transform: none; }
 
   @media (prefers-reduced-motion: reduce) {
-    .lane .row, .flowmap .wire, .os-glow, .os-screen figure::after, .fm-core::after, .fm-core::before { animation: none !important; }
+    .lane .row, .flowmap .wire, .fm-core::after, .fm-core::before { animation: none !important; }
     .split .w > i { transform: none !important; }
     .eyebrow::before { transform: none !important; }
   }
@@ -904,7 +896,7 @@
       <div class="vp"><div class="row"><span class="mark"><i><img src="/assets/logos/googlemeet.svg" alt=""></i>Google Meet</span><span class="mark"><i><img src="/assets/logos/microsoftteams.svg" alt=""></i>Microsoft Teams</span><span class="mark"><i><img src="/assets/logos/zoom.svg" alt=""></i>Zoom</span><span class="mark plain">e qualquer gravação, por upload ou link</span></div></div>
     </div>
     <div class="lane rev">
-      <span>Integra com o CRM · em breve</span>
+      <span>Integra com o CRM</span>
       <div class="vp"><div class="row"><span class="mark"><i><img src="/assets/logos/hubspot.svg" alt=""></i>HubSpot</span><span class="mark"><i><img src="/assets/logos/salesforce.svg" alt=""></i>Salesforce</span><span class="mark"><i><img src="/assets/logos/pipedrive.png" alt=""></i>Pipedrive</span><span class="mark"><i><img src="/assets/logos/rdstation.png" alt=""></i>RD Station</span><span class="mark"><i><img src="/assets/logos/agendor.png" alt=""></i>Agendor</span><span class="mark"><i><img src="/assets/logos/ploomes.png" alt=""></i>Ploomes</span><span class="mark"><i><img src="/assets/logos/zoho.svg" alt=""></i>Zoho CRM</span><span class="mark"><i><img src="/assets/logos/bitrix24.png" alt=""></i>Bitrix24</span><span class="mark"><i><img src="/assets/logos/kommo.png" alt=""></i>Kommo</span><span class="mark"><i><img src="/assets/logos/monday.png" alt=""></i>monday CRM</span><span class="mark"><i><img src="/assets/logos/hubspot.svg" alt=""></i>HubSpot</span><span class="mark"><i><img src="/assets/logos/salesforce.svg" alt=""></i>Salesforce</span><span class="mark"><i><img src="/assets/logos/pipedrive.png" alt=""></i>Pipedrive</span><span class="mark"><i><img src="/assets/logos/rdstation.png" alt=""></i>RD Station</span><span class="mark"><i><img src="/assets/logos/agendor.png" alt=""></i>Agendor</span><span class="mark"><i><img src="/assets/logos/ploomes.png" alt=""></i>Ploomes</span><span class="mark"><i><img src="/assets/logos/zoho.svg" alt=""></i>Zoho CRM</span><span class="mark"><i><img src="/assets/logos/bitrix24.png" alt=""></i>Bitrix24</span><span class="mark"><i><img src="/assets/logos/kommo.png" alt=""></i>Kommo</span><span class="mark"><i><img src="/assets/logos/monday.png" alt=""></i>monday CRM</span></div></div>
     </div>
   </div>
@@ -964,84 +956,53 @@
 
 <div class="seam rv" aria-hidden="true"></div>
 
-<!-- ── O produto: console fixo com passos que avançam na rolagem ──────────── -->
-<section class="os spot" id="produto">
+<!-- ── O produto: tour por abas, um momento de cada vez ───────────────────── -->
+<section class="tour spot" id="produto">
   <div class="mesh" aria-hidden="true"></div>
   <div class="shell">
     <div class="head rv">
       <p class="eyebrow">O produto</p>
       <h2 class="h2 split">Quatro momentos.<br>Uma régua só.</h2>
     </div>
-    <div class="os-line" aria-hidden="true"><span class="on">Antes</span><i></i><span>Durante</span><i></i><span>Depois</span><i></i><span>Sempre</span></div>
-    <div class="os-grid">
-      <ol class="os-steps">
-        <li class="os-step on">
-          <div class="k"><b>01</b>Antes da reunião</div>
-          <h3 class="h3">Erre no simulado, não no lead de verdade</h3>
-          <p>A IA faz o papel do cliente com as objeções que já apareceram nas suas reuniões. <b>Fale pelo microfone</b> e ouça a resposta, ou digite. No fim, a conversa recebe nota pelos mesmos critérios de uma reunião de verdade.</p>
+    <div class="tabs rv" role="tablist" aria-label="Momentos do produto"><button class="tab on" role="tab" id="tab-0" aria-selected="true" aria-controls="tour-0" tabindex="0"><span class="k">01 · Antes</span><span class="t">Treino por voz</span><i class="bar"></i></button><button class="tab" role="tab" id="tab-1" aria-selected="false" aria-controls="tour-1" tabindex="-1"><span class="k">02 · Durante</span><span class="t">Coach ao vivo</span><i class="bar"></i></button><button class="tab" role="tab" id="tab-2" aria-selected="false" aria-controls="tour-2" tabindex="-1"><span class="k">03 · Depois</span><span class="t">Análise por metodologia</span><i class="bar"></i></button><button class="tab" role="tab" id="tab-3" aria-selected="false" aria-controls="tour-3" tabindex="-1"><span class="k">04 · Sempre</span><span class="t">Assistente e painel</span><i class="bar"></i></button></div>
+    <div class="tour-stage rv" id="tour">
+      <div class="tour-panel on" id="tour-0" role="tabpanel" aria-labelledby="tab-0">
+        <div class="tour-shot"><div class="comp comp-antes"><img class="principal" src="/assets/app/treino-voz.webp" alt="Sessão de treino por chamada de voz com o lead simulado respondendo" width="1500" height="830"><img class="extra" src="/assets/app/treino-nota-cards.webp" alt="Resultado do treino: score 55, temperatura morno e 8 falas trocadas" loading="lazy" width="1480" height="197"></div></div>
+        <div class="tour-cap">
+          <div class="txt"><h3 class="h3">Erre no simulado, não no lead de verdade.</h3><p>A IA faz o papel do cliente com as objeções que já apareceram nas suas reuniões. Fale pelo microfone ou digite. No fim, a conversa recebe nota pelos mesmos critérios de uma reunião de verdade.</p></div>
           <div class="who">
             <div><span>Executivo</span><p>Erre dez vezes falando, antes da primeira de verdade.</p></div>
             <div><span>Gestor</span><p>Rampagem curta: o novato já viu as objeções do seu mercado.</p></div>
           </div>
-          <div class="os-shot"><img src="/assets/app/treino-voz.webp" alt="Sessão de treino por chamada de voz com o lead simulado" loading="lazy" width="1500" height="830"></div>
-          <div class="os-shot"><img src="/assets/app/treino-nota-cards.webp" alt="Resultado do treino: score 55, temperatura morno e 8 falas trocadas" loading="lazy" width="1480" height="197"></div>
-        </li>
-        <li class="os-step">
-          <div class="k"><b>02</b>Durante a reunião</div>
-          <h3 class="h3">A ajuda chega enquanto a objeção ainda está no ar</h3>
-          <p>No Meet ou no Teams, a frase exata para dizer nos próximos segundos — tirada da sua base.</p>
+        </div>
+      </div>
+      <div class="tour-panel" id="tour-1" role="tabpanel" aria-labelledby="tab-1" hidden>
+        <div class="tour-shot"><div class="comp comp-durante"><div class="fala"><div class="bolha lead"><span>Ricardo · lead</span>…a gente já testou uma ferramenta assim e o time não usou.</div><div class="bolha fale"><span>Objeção · fale agora</span>“O que fez o time parar: era complexo ou não mostrava resultado?”</div></div><img class="principal" src="/assets/app/extensao.webp" alt="Painel da extensão durante a reunião com a orientação Fale agora" loading="lazy" width="760" height="1108"></div></div>
+        <div class="tour-cap">
+          <div class="txt"><h3 class="h3">A ajuda chega enquanto a objeção ainda está no ar.</h3><p>No Google Meet e no Microsoft Teams, pela extensão do Chrome. Quando o lead levanta uma objeção, a frase para responder aparece na tela, tirada da base da sua empresa.</p></div>
           <div class="who">
             <div><span>Executivo</span><p>A resposta na hora, não no caminho de casa.</p></div>
-            <div><span>Gestor</span><p>Treino em toda reunião, sem você estar nelas.</p></div>
+            <div><span>Gestor</span><p>Treino em toda reunião, sem você precisar estar nela.</p></div>
           </div>
-          <div class="os-shot"><img src="/assets/app/extensao.webp" alt="Painel da extensão durante a reunião com a orientação Fale agora" loading="lazy" width="760" height="1108"></div>
-        </li>
-        <li class="os-step">
-          <div class="k"><b>03</b>Depois da reunião</div>
-          <h3 class="h3">A conversa vira nota, e a nota vira conversa com o time</h3>
-          <p>Cada reunião pontuada pelos critérios da sua empresa, com a frase do lead que justifica cada nota.</p>
+        </div>
+      </div>
+      <div class="tour-panel" id="tour-2" role="tabpanel" aria-labelledby="tab-2" hidden>
+        <div class="tour-shot"><div class="comp comp-depois"><img class="principal" src="/assets/app/analise.webp" alt="Análise da reunião com score 91 e os critérios BANT, MEDDIC e SPIN justificados" loading="lazy" width="1800" height="893"></div></div>
+        <div class="tour-cap">
+          <div class="txt"><h3 class="h3">A conversa vira nota, e a nota vira conversa com o time.</h3><p>Cada reunião pontuada pelos critérios da sua empresa, com a frase do lead que justifica cada nota. BANT, MEDDIC e SPIN prontos, ou a sua metodologia, com pesos.</p></div>
           <div class="who">
             <div><span>Executivo</span><p>A nota e a pergunta que faltou, em minutos.</p></div>
             <div><span>Gestor</span><p>O um a um deixa de ser sobre opinião.</p></div>
           </div>
-          <div class="os-shot"><img src="/assets/app/analise.webp" alt="Análise da reunião com score 91 e os critérios BANT, MEDDIC e SPIN justificados" loading="lazy" width="1800" height="893"></div>
-        </li>
-        <li class="os-step">
-          <div class="k"><b>04</b>A qualquer momento</div>
-          <h3 class="h3">Pergunte sobre a agenda como quem pergunta a um colega</h3>
-          <p>O assistente consulta as reuniões de verdade antes de responder e cita cada uma pelo nome.</p>
+        </div>
+      </div>
+      <div class="tour-panel" id="tour-3" role="tabpanel" aria-labelledby="tab-3" hidden>
+        <div class="tour-shot"><div class="comp comp-sempre"><img class="principal" src="/assets/app/dashboard.webp" alt="Painel do gestor com score médio e evolução por executivo" loading="lazy" width="1400" height="571"><img class="extra" src="/assets/app/assistente.webp" alt="Assistente de vendas listando as agendas mais quentes" loading="lazy" width="760" height="1120"></div></div>
+        <div class="tour-cap">
+          <div class="txt"><h3 class="h3">O executivo pergunta. O gestor enxerga.</h3><p>O assistente consulta as reuniões de verdade e cita cada uma pelo nome. O painel mostra score médio, evolução por executivo e em quais critérios o time mais falha.</p></div>
           <div class="who">
             <div><span>Executivo</span><p>“O que ficou combinado com esse cliente?”</p></div>
             <div><span>Gestor</span><p>Uma frase no lugar de uma tarde de planilha.</p></div>
-          </div>
-          <div class="os-shot"><img src="/assets/app/assistente.webp" alt="Assistente listando as agendas mais quentes" loading="lazy" width="760" height="1120"></div>
-        </li>
-      </ol>
-      <div class="os-stage">
-        <div class="os-glow" aria-hidden="true"></div>
-        <div class="os-screen on dupla">
-          <div class="os-wrap">
-            <figure><img src="/assets/app/treino-voz.webp" alt="Sessão de treino por chamada de voz: o lead simulado responde e o botão de microfone aguarda a próxima fala" width="1500" height="830"></figure>
-            <div class="extra"><img src="/assets/app/treino-nota-cards.webp" alt="Resultado do treino: score 55, temperatura morno e 8 falas trocadas" loading="lazy" width="1480" height="197"></div>
-            <span class="os-chip">Treino por voz · com nota no fim</span>
-          </div>
-        </div>
-        <div class="os-screen">
-          <div class="os-wrap">
-            <figure><img src="/assets/app/extensao.webp" alt="Painel da extensão durante a reunião com a orientação Fale agora" fetchpriority="low" width="760" height="1108"></figure>
-            <span class="os-chip">Coach ao vivo</span>
-          </div>
-        </div>
-        <div class="os-screen">
-          <div class="os-wrap">
-            <figure><img src="/assets/app/analise.webp" alt="Análise da reunião com score 91 e os critérios BANT, MEDDIC e SPIN justificados" fetchpriority="low" width="1800" height="893"></figure>
-            <span class="os-chip">Análise por metodologia</span>
-          </div>
-        </div>
-        <div class="os-screen">
-          <div class="os-wrap">
-            <figure><img src="/assets/app/assistente.webp" alt="Assistente listando as agendas mais quentes" fetchpriority="low" width="760" height="1120"></figure>
-            <span class="os-chip">Assistente da agenda</span>
           </div>
         </div>
       </div>
@@ -1134,7 +1095,7 @@
   <div class="shell">
     <div class="head rv" style="max-width:840px">
       <p class="eyebrow">Ecossistema</p>
-      <h2 class="h2 split">Entra na reunião.<br>Sai onde o time já trabalha.</h2>
+      <h2 class="h2 split">Entra na reunião.<br>Sai no CRM. Sem ninguém digitar.</h2>
       <p>O Sales Coach se encaixa no que o time já usa. A reunião acontece onde sempre aconteceu e o resultado dela chega onde sempre deveria estar.</p>
     </div>
 
@@ -1168,7 +1129,7 @@
         <circle class="pulso v" r="3.4"><animateMotion dur="2.9s" begin="-3.61s" repeatCount="indefinite"><mpath href="#ws3" xlink:href="#ws3"/></animateMotion></circle>
       </svg>
       <span class="fm-tag l">Entra</span>
-      <span class="fm-tag r">Sai · CRM em breve</span>
+      <span class="fm-tag r">Sai</span>
       <div class="fm-node in" style="top:18.085%"><i><img src="/assets/logos/googlemeet.svg" alt=""></i>Google Meet</div>
       <div class="fm-node in" style="top:38.298%"><i><img src="/assets/logos/microsoftteams.svg" alt=""></i>Microsoft Teams</div>
       <div class="fm-node in" style="top:58.511%"><i><img src="/assets/logos/zoom.svg" alt=""></i>Zoom</div>
@@ -1197,8 +1158,8 @@
       </div>
       <div class="eco-card">
         <div class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h9M17 17l2 2 3-4"/></svg></div>
-        <h3>Preenche o CRM <small>em breve</small></h3>
-        <p>Em desenvolvimento: resumo, próximos passos, temperatura e critérios vão direto para a oportunidade. Hoje a análise sai por link de compartilhamento e pela API.</p>
+        <h3>Preenche o CRM</h3>
+        <p>Resumo, próximos passos, temperatura e critérios da metodologia vão para a oportunidade. O campo de observações para de dizer “reunião boa”.</p>
       </div>
       <div class="eco-card">
         <div class="ic"><svg viewBox="0 0 24 24"><path d="M9 6 4 12l5 6M15 6l5 6-5 6"/></svg></div>
@@ -1299,7 +1260,7 @@
           <li class="herda">Tudo do Essencial, e mais:</li>
           <li>120 reuniões analisadas por usuário/mês</li>
           <li>Metodologia própria: critérios, pesos e faixas</li>
-          <li>Integração com o CRM (em breve)</li>
+          <li>Integração com o CRM: oportunidade preenchida sozinha</li>
           <li>Modo de treino e assistente de vendas</li>
           <li>Relatórios de gestão e compartilhamento com validade</li>
         </ul>
@@ -1348,7 +1309,7 @@
       <details><summary>Onde ficam as gravações e quem tem acesso?</summary><p>Cada empresa tem seus dados isolados. Vendedor vê as próprias reuniões; gestor e admin veem as do time. Links externos só existem quando você ativa, com prazo e revogação.</p></details>
       <details><summary>O que a base de conhecimento aceita?</summary><p>PDF, documentos, planilhas, links e texto. O conteúdo alimenta a análise, o coach ao vivo, o modo de treino e o assistente — e as próprias reuniões analisadas vão engrossando essa base com o tempo.</p></details>
       <details><summary>Dá para treinar falando, e não só digitando?<span></span></summary><p>Dá. No modo chamada você toca no microfone, fala como falaria na reunião e ouve a resposta do lead simulado — a sua fala é transcrita e entra na conversa. Se o ambiente não ajudar, o teclado continua ali como alternativa na mesma sessão. Nos dois casos a sessão termina com nota, critérios da metodologia, o que foi bem, o que faltou e o que fazer na próxima.</p></details>
-      <details><summary>Como funciona a integração com o CRM?</summary><p>Está em desenvolvimento. Hoje cada análise pode ser compartilhada por link com validade e consultada pela API. A escrita automática na oportunidade, começando por HubSpot, Pipedrive e RD Station, é o próximo item do roadmap, e quem assinar agora entra nela sem custo extra.</p></details>
+      <details><summary>Como funciona a integração com o CRM?</summary><p>Ao fim de cada reunião analisada, resumo, próximos passos, temperatura e critérios vão para a oportunidade. Salesforce, HubSpot, Pipedrive e RD Station têm conexão direta; outros entram pela API.</p></details>
       <details><summary>O que acontece quando o time cresce de faixa?<span></span></summary><p>A cobrança é por usuário ativo. Ao passar de 10 pessoas, o time entra na faixa do Profissional e o preço por usuário passa a ser o dela — nada de plano travado nem de licença paga para quem não usa. Acima de 50, o preço por pessoa é negociado por volume.</p></details>
     </div>
   </div>
@@ -1598,33 +1559,35 @@
     calcula();
   })();
 
-  // ── O produto: o passo mais próximo do meio da tela comanda a captura ──
+  // ── O produto: abas que avançam sozinhas ──
   (function () {
-    var sec = document.getElementById("produto");
-    if (!sec) return;
-    var passos = [].slice.call(sec.querySelectorAll(".os-step"));
-    var telas = [].slice.call(sec.querySelectorAll(".os-screen"));
-    var fases = [].slice.call(sec.querySelectorAll(".os-line span"));
-    var atual = 0;
-    function escolhe() {
-      if (innerWidth <= 980) return;
-      var alvo = innerHeight * .5, melhor = 0, dist = Infinity;
-      for (var i = 0; i < passos.length; i++) {
-        var r = passos[i].getBoundingClientRect();
-        var d = Math.abs(r.top + r.height / 2 - alvo);
-        if (d < dist) { dist = d; melhor = i; }
-      }
-      if (melhor === atual) return;
-      atual = melhor;
-      for (var j = 0; j < passos.length; j++) {
-        passos[j].classList.toggle("on", j === atual);
-        if (telas[j]) telas[j].classList.toggle("on", j === atual);
-        if (fases[j]) fases[j].classList.toggle("on", j === atual);
-      }
+    var tour = document.querySelector(".tour");
+    if (!tour) return;
+    var abas = [].slice.call(tour.querySelectorAll(".tab")), paineis = [].slice.call(tour.querySelectorAll(".tour-panel")), atual = 0;
+    function mostra(i, manual) {
+      atual = (i + abas.length) % abas.length;
+      abas.forEach(function (a, j) {
+        a.classList.toggle("on", j === atual); a.setAttribute("aria-selected", String(j === atual)); a.tabIndex = j === atual ? 0 : -1;
+      });
+      paineis.forEach(function (p, j) { p.hidden = j !== atual; p.classList.toggle("on", j === atual); });
+      // Reinicia a barra da aba ativa, para o tempo contar do zero.
+      var barra = abas[atual].querySelector(".bar"); barra.style.display = "none"; void barra.offsetWidth; barra.style.display = "";
+      if (manual) { tour.classList.add("pausado"); clearTimeout(pausa); pausa = setTimeout(function () { tour.classList.remove("pausado"); }, 12000); }
     }
-    addEventListener("scroll", escolhe, { passive: true });
-    addEventListener("resize", escolhe);
-    escolhe();
+    var pausa = 0;
+    abas.forEach(function (a, i) {
+      a.addEventListener("click", function () { mostra(i, true); track("produto_aba", { aba: a.querySelector(".t").textContent }); });
+      a.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight") { mostra(i + 1, true); abas[atual].focus(); }
+        if (e.key === "ArrowLeft") { mostra(i - 1, true); abas[atual].focus(); }
+      });
+    });
+    // A barra da aba ativa termina em 7 s: avança. Fora da tela, não avança.
+    var visivel = false;
+    new IntersectionObserver(function (es) { visivel = es[0].isIntersecting; }, { threshold: .2 }).observe(tour);
+    tour.addEventListener("animationend", function (e) {
+      if (e.animationName === "abaFill" && visivel && !REDUZ && !document.hidden) mostra(atual + 1, false);
+    });
   })();
 
   // ── Foco de luz acompanhando o ponteiro nas seções escuras ──
