@@ -94,7 +94,12 @@
   #stars { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
 
   /* ── Hero ── */
-  .hero { padding-top: calc(var(--nav-h) + 74px); padding-bottom: 0; text-align: center; isolation: isolate; }
+  /* A hero funciona como a da home do GitHub: o texto fica preso na primeira
+     tela, o mockup começa com só a borda de cima aparecendo no rodapé e sobe
+     por cima do texto conforme a rolagem, apagando o texto no caminho. */
+  .hero { padding: 0; text-align: center; isolation: isolate; }
+  .hero-pin { position: sticky; top: 0; z-index: 1; height: 100vh; height: 100svh; display: flex; flex-direction: column; justify-content: center; padding: calc(var(--nav-h) + 10px) 0 24vh; will-change: opacity, transform; }
+  .hero-pin.apagado { pointer-events: none; }
   .hero .h1 { margin-top: 26px; font-size: clamp(30px, 4.6vw, 60px); }
   .hero .h1 em { font-style: normal; background: linear-gradient(100deg, #fff 18%, var(--blue-2) 58%, var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .hero .sub { margin: 22px auto 0; max-width: 640px; font-size: 17px; color: var(--dim); }
@@ -135,15 +140,18 @@
 
   /* Mockup do produto na primeira dobra. */
   /* Sem rotação 3D: a projeção deformava a captura e o texto dentro dela. */
-  .stage { position: relative; margin-top: 62px; overflow-x: clip; }
-  .win { position: relative; margin-inline: auto; max-width: 1080px; border-radius: 14px 14px 0 0; overflow: hidden; border: 1px solid rgba(146,176,236,.2); border-bottom: 0; background: #0B1220; box-shadow: 0 -10px 60px -20px rgba(79,139,240,.5), 0 60px 120px -40px rgba(0,0,0,.95); }
+  .stage { position: relative; z-index: 2; margin-top: -12vh; overflow-x: clip; }
+  /* Feixe de luz saindo da borda de cima do mockup, como a home do GitHub. */
+  .stage::before { content: ""; position: absolute; left: 50%; top: -150px; width: min(1000px, 84vw); height: 300px; translate: -50% 0; z-index: -1; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 100%, rgba(79,139,240,.6), rgba(123,108,246,.28) 42%, transparent 72%); filter: blur(28px); }
+  .win { position: relative; margin-inline: auto; max-width: 1080px; border-radius: 14px 14px 0 0; overflow: hidden; border: 1px solid rgba(146,176,236,.2); border-bottom: 0; background: #0B1220; box-shadow: 0 -24px 100px -28px rgba(79,139,240,.7), 0 60px 120px -40px rgba(0,0,0,.95); border-top-color: rgba(143,193,255,.55); }
   .win-bar { display: flex; align-items: center; gap: 7px; padding: 11px 15px; background: rgba(146,176,236,.06); border-bottom: 1px solid rgba(146,176,236,.12); }
   .win-bar i { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,.16); }
   .win-bar span { margin-left: 8px; font-size: 11.5px; color: var(--dim-2); }
   .win img { width: 100%; }
   /* A tela some por baixo em vez de terminar num corte reto. */
   .stage::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 220px; background: linear-gradient(180deg, transparent, var(--ink-0) 88%); pointer-events: none; }
-  @media (max-width: 820px) { .stage::after { height: 120px; } }
+  @media (max-width: 820px) { .stage::after { height: 120px; } .stage { margin-top: -10vh; } .hero-pin { padding-bottom: 20vh; } }
 
   /* ── Barra de confiança ──
      Os logos vinham como glifos quadrados de 21px sob grayscale+brightness:
@@ -824,6 +832,7 @@
   <canvas id="stars" aria-hidden="true"></canvas>
 
 
+  <div class="hero-pin" id="hero-pin">
   <div class="shell">
     <span class="pill rv in" data-par="0.10"><span class="dot"></span>Coach de vendas com IA · <b>em português</b></span>
     <h1 class="h1 rv in" data-par="0.06">O gestor não ouve todas as reuniões.<br><span class="sobe"><i>O Sales Coach <span class="mao" data-words="ouve.|pontua.|orienta.|treina.|responde.">ouve.</span></i></span></h1>
@@ -833,8 +842,9 @@
     </div>
     <p class="note rv in">No ar em uma semana · com o seu playbook e a sua metodologia já dentro</p>
   </div>
+  </div>
 
-  <div class="stage rv in" data-par="-0.05">
+  <div class="stage rv in" id="hero-stage">
   <div class="nodes" aria-hidden="true">
     <div class="node n1"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></svg></span>Nota de 0 a 100<i class="wire"></i></div>
     <div class="node n2"><span class="ic"><svg viewBox="0 0 24 24"><path d="M7 7h4v4c0 2.2-1.6 3.7-3.6 4.2M14 7h4v4c0 2.2-1.6 3.7-3.6 4.2"/></svg></span>A frase que justifica cada nota<i class="wire"></i></div>
@@ -1393,6 +1403,7 @@
   medirTrilhos(); moverTrilhos();
 
   // ── Parallax por elemento e barra de progresso ──
+  var heroPin = document.getElementById("hero-pin"), heroStage = document.getElementById("hero-stage");
   var parEls = [].slice.call(document.querySelectorAll("[data-par]"));
   var parX = [].slice.call(document.querySelectorAll("[data-parx]"));
   var prog = document.getElementById("prog");
@@ -1418,6 +1429,16 @@
     }
     var total = document.body.scrollHeight - vh;
     prog.style.width = total > 0 ? ((scrollY / total) * 100).toFixed(2) + "%" : "0";
+
+    // Hero: enquanto o mockup sobe, o texto preso atrás dele apaga e recua.
+    if (heroPin && heroStage) {
+      var topo = heroStage.getBoundingClientRect().top;
+      var comeca = vh * 0.86, termina = vh * 0.30;
+      var k = Math.min(1, Math.max(0, (comeca - topo) / (comeca - termina)));
+      heroPin.style.opacity = (1 - k).toFixed(3);
+      heroPin.style.transform = "translateY(" + (-k * 28).toFixed(1) + "px) scale(" + (1 - k * 0.04).toFixed(3) + ")";
+      heroPin.classList.toggle("apagado", k > 0.6);
+    }
   }
   movimento();
 
