@@ -103,6 +103,9 @@
 
   /* A segunda linha do título entra subindo, e o gradiente atravessa a
      palavra logo depois — é ela que carrega a virada da frase. */
+  /* Palavra manuscrita: a fonte vira traçado SVG e é desenhada como caneta. */
+  .mao { display: inline-block; color: var(--blue-2); white-space: nowrap; }
+  .mao svg { display: inline-block; overflow: visible; vertical-align: -.2em; }
   .sobe { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .12em; margin-bottom: -.12em; }
   .sobe > i { display: inline-block; font-style: normal; transform: translateY(112%); animation: sobeLinha 1s cubic-bezier(.22,1,.36,1) .5s forwards; }
   @keyframes sobeLinha { to { transform: none; } }
@@ -823,7 +826,7 @@
 
   <div class="shell">
     <span class="pill rv in" data-par="0.10"><span class="dot"></span>Coach de vendas com IA · <b>em português</b></span>
-    <h1 class="h1 rv in" data-par="0.06">O gestor não ouve todas as reuniões.<br><span class="sobe"><i>O Sales Coach <em>ouve</em>.</i></span></h1>
+    <h1 class="h1 rv in" data-par="0.06">O gestor não ouve todas as reuniões.<br><span class="sobe"><i>O Sales Coach <span class="mao" data-words="ouve.|pontua.|orienta.|treina.|responde.">ouve.</span></i></span></h1>
     <p class="sub rv in" data-par="0.04">Analisa toda reunião do Meet, do Teams e do Zoom. Devolve score por BANT, MEDDIC ou SPIN, a objeção que travou o deal e o próximo passo. E mostra ao gestor o que treinar com cada vendedor.</p>
     <div class="cta rv in" data-par="0.02">
       <a class="btn btn-solid magnet" href="#produto">Ver o Sales Coach em ação <span aria-hidden="true">↗</span></a>
@@ -1565,6 +1568,84 @@
     });
     b.addEventListener("mouseleave", function () { b.style.transform = ""; });
   });
+
+  // ── Palavra manuscrita na hero ──
+  // Porte em JS puro do componente HandwritingText (React). A fonte é lida
+  // do TTF e convertida em traçados; cada contorno vira um <path> desenhado
+  // em sequência — o tracejado do SVG reinicia a cada subcaminho, por isso a
+  // separação — e uma cópia preenchida da palavra inteira entra no fim, para
+  // os buracos do "o" e do "e" continuarem buracos. O opentype.js vem do CDN
+  // na primeira necessidade; sem ele ou sem a fonte, fica o texto simples.
+  (function () {
+    var alvo = document.querySelector(".mao");
+    if (!alvo) return;
+    var palavras = (alvo.dataset.words || alvo.textContent).split("|").map(function (p) { return p.trim(); }).filter(Boolean);
+    if (REDUZ || !palavras.length) return;
+    var FONTE = "/assets/fonts/caveat.ttf", EM = 100, DUR = 1.5, LARGURA = 1.7, INTERVALO = 3400;
+    var NS = "http://www.w3.org/2000/svg";
+
+    function lib() {
+      if (window.opentype) return Promise.resolve(window.opentype);
+      return new Promise(function (ok, falha) {
+        var s = document.createElement("script");
+        s.src = "https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js";
+        s.async = true;
+        s.onload = function () { window.opentype ? ok(window.opentype) : falha(new Error("opentype vazio")); };
+        s.onerror = function () { falha(new Error("cdn")); };
+        document.head.appendChild(s);
+      });
+    }
+
+    function desenha(fonte, palavra, atraso) {
+      var caminho = fonte.getPath(palavra, 0, EM, EM), caixa = caminho.getBoundingBox(), pad = EM * 0.12;
+      var cheio = caminho.toPathData(2);
+      var contornos = cheio.split(/(?=M)/).filter(function (d) { return d.trim().length > 1; });
+      var w = caixa.x2 - caixa.x1 + pad * 2, h = caixa.y2 - caixa.y1 + pad * 2;
+      var svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("viewBox", (caixa.x1 - pad) + " " + (caixa.y1 - pad) + " " + w + " " + h);
+      svg.setAttribute("role", "img"); svg.setAttribute("aria-label", palavra);
+      svg.style.height = "1.25em"; svg.style.width = "calc(1.25em * " + (w / h).toFixed(4) + ")";
+      var tinta = document.createElementNS(NS, "path");
+      tinta.setAttribute("d", cheio); tinta.setAttribute("fill", "currentColor"); tinta.setAttribute("stroke", "none");
+      tinta.style.opacity = "0";
+      svg.appendChild(tinta);
+      var n = Math.max(1, contornos.length), tracos = [];
+      contornos.forEach(function (d) {
+        var p = document.createElementNS(NS, "path");
+        p.setAttribute("d", d); p.setAttribute("fill", "none"); p.setAttribute("stroke", "currentColor");
+        p.setAttribute("stroke-width", LARGURA); p.setAttribute("stroke-linecap", "round"); p.setAttribute("stroke-linejoin", "round");
+        svg.appendChild(p); tracos.push(p);
+      });
+      alvo.textContent = ""; alvo.appendChild(svg);
+      // O comprimento de cada traço só existe depois de estar no DOM.
+      tracos.forEach(function (p) {
+        var L = p.getTotalLength() || 1;
+        p.style.transition = "none"; p.style.strokeDasharray = L; p.style.strokeDashoffset = L;
+      });
+      // Dois quadros: o primeiro fixa os traços "recolhidos", o segundo anima.
+      requestAnimationFrame(function () { requestAnimationFrame(function () {
+        tracos.forEach(function (p, i) {
+          var cada = (DUR / n) * 2.4, inicio = atraso + (i / n) * DUR;
+          p.style.transition = "stroke-dashoffset " + cada.toFixed(3) + "s ease-out " + inicio.toFixed(3) + "s";
+          p.style.strokeDashoffset = "0";
+        });
+        tinta.style.transition = "opacity .45s ease-out " + (atraso + DUR * 0.72).toFixed(3) + "s";
+        tinta.style.opacity = "1";
+      }); });
+    }
+
+    Promise.all([lib(), fetch(FONTE).then(function (r) { if (!r.ok) throw new Error("fonte " + r.status); return r.arrayBuffer(); })])
+      .then(function (par) {
+        var fonte = par[0].parse(par[1]), i = 0;
+        // A primeira palavra espera a linha terminar de subir.
+        desenha(fonte, palavras[0], 1.1);
+        if (palavras.length > 1) setTimeout(function troca() {
+          if (!document.hidden) { i = (i + 1) % palavras.length; desenha(fonte, palavras[i], 0.05); }
+          setTimeout(troca, INTERVALO);
+        }, INTERVALO + 1400);
+      })
+      .catch(function () { /* fica o texto simples */ });
+  })();
 
   // ── Formulário ──
   document.getElementById("lead").addEventListener("submit", function (e) {
